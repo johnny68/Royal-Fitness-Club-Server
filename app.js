@@ -6,7 +6,7 @@ const logger = require('morgan');
 const bodyParser = require('body-parser');
 
 const port = 3000;
-const host = '0.0.0.0'
+const host = '0.0.0.0';
 
 
 var indexRouter = require('./routes/index');
