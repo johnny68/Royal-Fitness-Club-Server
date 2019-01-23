@@ -25,7 +25,7 @@ function createPassword(){
 
 function createLink(request){
     const rand = randomString.generate({
-        length: 12,
+        length: 2,
         charset: 'alphanumeric'
       });
       host = request.get('host');

@@ -115,7 +115,6 @@ router.post('/user/create', (request, response) => {
   const user_aaddhar = request.body.user_aaddhar;
   const user_address = request.body.user_address;
   const user_city = request.body.user_city;
-  const user_state = request.body.user_state;
   const user_pincode = request.body.user_pincode;
   const user_mobile_number = request.body.user_mobile_number;
   const user_date_of_birth = moment(request.body.user_date_of_birth, "DD-MM-YYYY").format("YYYY-MM-DD");
@@ -129,24 +128,25 @@ router.post('/user/create', (request, response) => {
   const user_past_gym = request.body.user_past_gym;
   const user_past_protien = request.body.user_past_protien;
 
+  console.log(user_email, user_name, user_address, user_aaddhar, user_city, user_pincode,
+    user_mobile_number, user_date_of_birth, user_gender, user_blood_group, user_height, user_weight, user_purpose,
+    user_training_type, user_medical_history, user_past_gym, user_past_protien);
+
+
   var connection = db.connect();
   const generated_password = utils.createPassword()
   const password = crypto.createHash('SHA256').update(generated_password).digest('base64');
-  console.log(password, generated_password);
 
 
   const statement_user_create = `INSERT INTO users (user_email, user_password, user_active, user_name) VALUES ('${user_email}', '${password}', 'N', '${user_name}')`;
 
   connection.query(statement_user_create, (error, results) => {
-    console.log(results);
-    console.log(error);
-
     user_id = results.insertId;
     const statement_user_records = `INSERT INTO user_records
-    (user_id, user_aaddhar, user_address, user_city, user_state, user_pincode, user_mobile_number, user_date_of_birth, user_gender,
+    (user_id, user_aaddhar, user_address, user_city, user_pincode, user_mobile_number, user_date_of_birth, user_gender,
       user_blood_group, user_height, user_weight, user_purpose, user_training_type, user_medical_history, user_past_gym, user_past_protien)
     VALUES
-    (${user_id},'${user_aaddhar}','${user_address}','${user_city}','${user_state}','${user_pincode}','${user_mobile_number}','${user_date_of_birth}','${user_gender}'
+    (${user_id},'${user_aaddhar}','${user_address}','${user_city}','${user_pincode}','${user_mobile_number}','${user_date_of_birth}','${user_gender}'
     ,'${user_blood_group}','${user_height}','${user_weight}','${user_purpose}','${user_training_type}','${user_medical_history}','${user_past_gym}','${user_past_protien}')`;
 
 
@@ -161,7 +161,6 @@ router.post('/user/create', (request, response) => {
                 Also, Please click on the following link to verify your Email + '\n' +
                 ${link}`
     };
-    console.log(mailOptions);
     // send mail with defined transport object
     transporter.sendMail(mailOptions, function (error, info) {
 
@@ -172,21 +171,17 @@ router.post('/user/create', (request, response) => {
       response.send(info.responseCode);
     });
     /* Resuming Flow */
-    console.log(password);
-    console.log(statement_user_create);
     connection.query(statement_user_records, (error_create, results_create) => {
       console.log(results_create);
-      console.log(error_create);
     });
-
     const statement_verify = `INSERT INTO verify_user (user_id, verify_key) VALUES (${user_id}, '${link}')`;
-
     connection.query(statement_verify, (error_verify, results_verify) => {
-      console.log(error_verify);
-      console.log(results_verify);
     });
     connection.end();
-    response.send(utils.createResult(error, results));
+    var result = {};
+    result.status = 'success';
+    result.id = results.insertId;
+        response.send(result);
   });
 });
 
