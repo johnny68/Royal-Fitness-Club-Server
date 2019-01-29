@@ -40,6 +40,22 @@ router.post('/user/billing/first', (request, response) =>{
 
 });
 
+router.get('/user/get/billing/', (request, response) =>{
+    const user_id = request.query.user_id;
+    const connection = db.connect();
+    result = {};
+
+    const statement_due_date = `select user_plan, user_join_date, user_due_date from user_billing where user_id = ${user_id};select user_payment_method, billing_time from user_monthly where user_id = ${user_id}`;
+    connection.query(statement_due_date, (error_due_date, results_due_date) =>{
+        console.log(error_due_date);
+        console.log(results_due_date);
+        result.data = results_due_date;
+        response.send(result);
+        });
+
+        
+});
+
 router.post('/test', (request, response) => {
     var number = request.body.number;
     var message = request.body.message;

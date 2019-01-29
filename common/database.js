@@ -2,6 +2,7 @@ const mysql = require('mysql');
 
 function connect(){
     var connection = mysql.createConnection({
+        multipleStatements: true,
         host     : 'localhost',
         user     : 'siddhant',
         password : 'asdqwe99',
