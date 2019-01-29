@@ -5,6 +5,9 @@ const utils = require('../common/utils');
 const moment = require('moment');
 const randomString = require('randomstring');
 const nodemailer = require('nodemailer');
+const multer = require('multer');
+
+const upload = multer({dest: 'images/'});
 
 var router = express.Router();
 
@@ -109,7 +112,7 @@ router.get('/user/getAll', (request, response) => {
 
 /* Create Normal User */
 
-router.post('/user/create', (request, response) => {
+router.post('/user/create', upload.single('photo'), (request, response) => {
   const user_email = request.body.user_email;
   const user_name = request.body.user_name;
   const user_aaddhar = request.body.user_aaddhar;
@@ -128,6 +131,8 @@ router.post('/user/create', (request, response) => {
   const user_past_gym = request.body.user_past_gym;
   const user_past_protien = request.body.user_past_protien;
 
+  const thumbnail = request.file.filename;
+
   console.log(user_email, user_name, user_address, user_aaddhar, user_city, user_pincode,
     user_mobile_number, user_date_of_birth, user_gender, user_blood_group, user_height, user_weight, user_purpose,
     user_training_type, user_medical_history, user_past_gym, user_past_protien);
@@ -141,13 +146,15 @@ router.post('/user/create', (request, response) => {
   const statement_user_create = `INSERT INTO users (user_email, user_password, user_active, user_name) VALUES ('${user_email}', '${password}', 'N', '${user_name}')`;
 
   connection.query(statement_user_create, (error, results) => {
+    console.log(error);
+    console.log(results);
     user_id = results.insertId;
     const statement_user_records = `INSERT INTO user_records
     (user_id, user_aaddhar, user_address, user_city, user_pincode, user_mobile_number, user_date_of_birth, user_gender,
-      user_blood_group, user_height, user_weight, user_purpose, user_training_type, user_medical_history, user_past_gym, user_past_protien)
+      user_blood_group, user_height, user_weight, user_purpose, user_training_type, user_medical_history, user_past_gym, user_past_protien, pic_uri)
     VALUES
     (${user_id},'${user_aaddhar}','${user_address}','${user_city}','${user_pincode}','${user_mobile_number}','${user_date_of_birth}','${user_gender}'
-    ,'${user_blood_group}','${user_height}','${user_weight}','${user_purpose}','${user_training_type}','${user_medical_history}','${user_past_gym}','${user_past_protien}')`;
+    ,'${user_blood_group}','${user_height}','${user_weight}','${user_purpose}','${user_training_type}','${user_medical_history}','${user_past_gym}','${user_past_protien}', '${thumbnail}')`;
 
 
     /* Sending mail*/
@@ -159,12 +166,16 @@ router.post('/user/create', (request, response) => {
       subject: 'Welcome to Royal Fitness Club !',
       text: `Password for Royal Fitness Club for ${request.body.user_name} and Email ID ${request.body.user_email} is ${generated_password} + '\n' +
                 Also, Please click on the following link to verify your Email + '\n' +
-                ${link}`
+                ${link}`,
+      html: `<h4> Password for ${request.body.user_name} and Email ID ${request.body.user_email} </h4> <hr> \n
+              <h1>${generated_password}</h1> \n
+              <b>Also, Please click on the following link to verify your Email</b>\n
+              <a href="${link}"> Link</a>`
     };
     // send mail with defined transport object
     transporter.sendMail(mailOptions, function (error, info) {
 
-      if (error) {
+      if (error) { 
         return console.log('Error in Sendmail', error);
       }
       console.log('Message %s sent: %s', info.messageId, info.response);
@@ -173,6 +184,7 @@ router.post('/user/create', (request, response) => {
     /* Resuming Flow */
     connection.query(statement_user_records, (error_create, results_create) => {
       console.log(results_create);
+      console.log(error_create);
     });
     const statement_verify = `INSERT INTO verify_user (user_id, verify_key) VALUES (${user_id}, '${link}')`;
     connection.query(statement_verify, (error_verify, results_verify) => {
