@@ -86,7 +86,7 @@ function sendSMS(number, message) {
     });
 
 
-    callback = (function (response_sms) {
+    /* callback = (function (response_sms) {
         var result = '';
         response_sms.on('data', (chunk) => {
             result += chunk;
@@ -99,7 +99,7 @@ function sendSMS(number, message) {
         });
     });
     http.request(options, callback).end();
-    return results;
+    return results; */
 }
 
 
