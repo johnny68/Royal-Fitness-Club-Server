@@ -12,6 +12,7 @@ const host = '0.0.0.0';
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var billingRouter = require('./routes/billing');
+var progressRouter = require('./routes/progress-reports');
 
 var app = express();
 
@@ -35,6 +36,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/', usersRouter);
 app.use('/', billingRouter);
+app.use('/progress-report/', progressRouter);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
